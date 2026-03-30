@@ -1,16 +1,13 @@
 <?php
-
 class Produto
 {
-    private $id;
-    private $nome;
-    private $preco;
+    private $id, $nome, $preco;
 
     public function __construct($id, $nome, $preco)
     {
         $this->id = $id;
         $this->nome = $nome;
-        $this->setPreco($preco);
+        $this->preco = $preco;
     }
 
     public function getId()
@@ -24,10 +21,5 @@ class Produto
     public function getPreco()
     {
         return $this->preco;
-    }
-
-    public function setPreco($preco)
-    {
-        $this->preco = ($preco < 0) ? 0 : $preco;
     }
 }

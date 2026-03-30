@@ -1,59 +1,51 @@
 <?php
+
 require_once "dao/ClienteDAO.php";
 require_once "dao/ProdutoDAO.php";
+require_once "dao/PedidoDAO.php";
+
 require_once "models/Cliente.php";
 require_once "models/Produto.php";
 require_once "models/Pedido.php";
 
 $clienteDAO = new ClienteDAO();
 $produtoDAO = new ProdutoDAO();
+$pedidoDAO = new PedidoDAO();
 
-// CADASTRAR CLIENTE
+# ================= CLIENTE =================
 if (isset($_POST['salvar_cliente'])) {
     $clienteDAO->inserir(
         new Cliente(null, $_POST['nome'], $_POST['email'])
     );
 }
 
-// CADASTRAR PRODUTO
+# ================= PRODUTO =================
 if (isset($_POST['salvar_produto'])) {
     $produtoDAO->inserir(
-        new Produto(null, $_POST['nome_prod'], $_POST['preco'])
+        new Produto(null, $_POST['nome_produto'], $_POST['preco'])
     );
 }
 
-// LISTAR
+# ================= PEDIDO =================
+if (isset($_POST['salvar_pedido'])) {
+    $pedidoDAO->inserir(
+        new Pedido(null, $_POST['cid'], $_POST['pid'])
+    );
+}
+
+# ================= LISTAS =================
 $clientes = $clienteDAO->listar();
 $produtos = $produtoDAO->listar();
+$pedidos = $pedidoDAO->listar();
 
-$pedido = null;
-
-// CRIAR PEDIDO
-if (isset($_POST['criar_pedido'])) {
-
-    $cliente = $clienteDAO->buscarPorId($_POST['cliente_id']);
-    $pedido = new Pedido(rand(1000, 9999), $cliente);
-
-    if (!empty($_POST['produtos'])) {
-        foreach ($_POST['produtos'] as $id) {
-            foreach ($produtos as $p) {
-                if ($p['id'] == $id) {
-                    $pedido->adicionarProduto(
-                        new Produto($p['id'], $p['nome'], $p['preco'])
-                    );
-                }
-            }
-        }
-    }
-}
 ?>
 
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Pedidos</title>
+    <title>Sistema Loja</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -61,84 +53,124 @@ if (isset($_POST['criar_pedido'])) {
 
     <div class="container">
 
-        <h1>💖 Sistema de Pedidos</h1>
+        <h1>💖 Sistema de Loja</h1>
 
         <!-- CLIENTE -->
         <div class="card">
-            <h2>👤 Cliente</h2>
+            <h2>Cadastrar Cliente</h2>
 
             <form method="POST">
-                <input type="text" name="nome" placeholder="Nome" required>
-                <input type="email" name="email" placeholder="Email" required>
-                <button name="salvar_cliente">Cadastrar</button>
+                <input name="nome" placeholder="Nome" required>
+                <input name="email" placeholder="Email" required>
+                <button name="salvar_cliente">Salvar</button>
             </form>
 
-            <ul>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Ações</th>
+                </tr>
+
                 <?php foreach ($clientes as $c): ?>
-                    <li><?= $c['nome'] ?> - <?= $c['email'] ?></li>
+                    <tr>
+                        <td><?= $c['id'] ?></td>
+                        <td><?= $c['nome'] ?></td>
+                        <td><?= $c['email'] ?></td>
+                        <td>
+                            <a href="editar_cliente.php?id=<?= $c['id'] ?>">Editar</a>
+                            <a href="excluir_cliente.php?id=<?= $c['id'] ?>"
+                                onclick="return confirm('Excluir?')">Excluir</a>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
-            </ul>
+            </table>
         </div>
 
         <!-- PRODUTO -->
         <div class="card">
-            <h2>📦 Produto</h2>
+            <h2>Cadastrar Produto</h2>
 
             <form method="POST">
-                <input type="text" name="nome_prod" placeholder="Produto" required>
-                <input type="number" name="preco" step="0.01" required>
-                <button name="salvar_produto">Cadastrar</button>
+                <input name="nome_produto" placeholder="Nome do produto" required>
+                <input name="preco" placeholder="Preço" required>
+                <button name="salvar_produto">Salvar</button>
             </form>
 
-            <ul>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Ações</th>
+                </tr>
+
                 <?php foreach ($produtos as $p): ?>
-                    <li><?= $p['nome'] ?> - R$ <?= number_format($p['preco'], 2, ',', '.') ?></li>
+                    <tr>
+                        <td><?= $p['id'] ?></td>
+                        <td><?= $p['nome'] ?></td>
+                        <td><?= $p['preco'] ?></td>
+                        <td>
+                            <a href="editar_produto.php?id=<?= $p['id'] ?>">Editar</a>
+                            <a href="excluir_produto.php?id=<?= $p['id'] ?>"
+                                onclick="return confirm('Excluir?')">Excluir</a>
+                        </td>
+                    </tr>
                 <?php endforeach; ?>
-            </ul>
+            </table>
         </div>
 
         <!-- PEDIDO -->
         <div class="card">
-            <h2>🧾 Pedido</h2>
+            <h2>Cadastrar Pedido</h2>
 
             <form method="POST">
 
-                <select name="cliente_id" required>
-                    <option value="">Selecione um cliente</option>
+                Cliente:
+                <select name="cid" required>
+                    <option value="">Selecione</option>
                     <?php foreach ($clientes as $c): ?>
-                        <option value="<?= $c['id'] ?>"><?= $c['nome'] ?></option>
+                        <option value="<?= $c['id'] ?>">
+                            <?= $c['nome'] ?>
+                        </option>
                     <?php endforeach; ?>
                 </select>
 
-                <br><br>
+                Produto:
+                <select name="pid" required>
+                    <option value="">Selecione</option>
+                    <?php foreach ($produtos as $p): ?>
+                        <option value="<?= $p['id'] ?>">
+                            <?= $p['nome'] ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
 
-                <?php foreach ($produtos as $p): ?>
-                    <label>
-                        <input type="checkbox" name="produtos[]" value="<?= $p['id'] ?>">
-                        <?= $p['nome'] ?> - R$ <?= number_format($p['preco'], 2, ',', '.') ?>
-                    </label><br>
-                <?php endforeach; ?>
-
-                <br>
-
-                <button name="criar_pedido">Criar Pedido</button>
+                <button name="salvar_pedido">Salvar</button>
             </form>
 
-            <?php if ($pedido): ?>
-                <hr>
+            <table>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Produto</th>
+                    <th>Ações</th>
+                </tr>
 
-                <h3>Pedido Nº <?= $pedido->getNumero(); ?></h3>
-                <p><strong>Cliente:</strong> <?= $pedido->getCliente()->getNome(); ?></p>
-
-                <ul>
-                    <?php foreach ($pedido->getProdutos() as $p): ?>
-                        <li><?= $p->getNome(); ?> - R$ <?= number_format($p->getPreco(), 2, ',', '.') ?></li>
-                    <?php endforeach; ?>
-                </ul>
-
-                <strong>Total: R$ <?= number_format($pedido->calcularTotal(), 2, ',', '.') ?></strong>
-            <?php endif; ?>
-
+                <?php foreach ($pedidos as $pd): ?>
+                    <tr>
+                        <td><?= $pd['id'] ?></td>
+                        <td><?= $pd['cliente_id'] ?></td>
+                        <td><?= $pd['produto_id'] ?></td>
+                        <td>
+                            <a href="editar_pedido.php?id=<?= $pd['id'] ?>">Editar</a>
+                            <a href="excluir_pedido.php?id=<?= $pd['id'] ?>"
+                                onclick="return confirm('Excluir?')">Excluir</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </table>
         </div>
 
     </div>

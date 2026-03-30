@@ -1,10 +1,7 @@
 <?php
-
 class Cliente
 {
-    private $id;
-    private $nome;
-    private $email;
+    private $id, $nome, $email;
 
     public function __construct($id, $nome, $email)
     {
@@ -24,14 +21,5 @@ class Cliente
     public function getEmail()
     {
         return $this->email;
-    }
-
-    public function setNome($nome)
-    {
-        $this->nome = $nome;
-    }
-    public function setEmail($email)
-    {
-        $this->email = $email;
     }
 }

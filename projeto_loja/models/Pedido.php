@@ -2,41 +2,30 @@
 
 class Pedido
 {
-    private $numero;
-    private $cliente;
-    private $produtos = [];
 
-    public function __construct($numero, Cliente $cliente)
+    private $id;
+    private $cliente_id;
+    private $produto_id;
+
+    public function __construct($id, $cliente_id, $produto_id)
     {
-        $this->numero = $numero;
-        $this->cliente = $cliente;
+        $this->id = $id;
+        $this->cliente_id = $cliente_id;
+        $this->produto_id = $produto_id;
     }
 
-    public function adicionarProduto(Produto $produto)
+    public function getId()
     {
-        $this->produtos[] = $produto;
+        return $this->id;
     }
 
-    public function getProdutos()
+    public function getClienteId()
     {
-        return $this->produtos;
+        return $this->cliente_id;
     }
 
-    public function calcularTotal()
+    public function getProdutoId()
     {
-        $total = 0;
-        foreach ($this->produtos as $produto) {
-            $total += $produto->getPreco();
-        }
-        return $total;
-    }
-
-    public function getNumero()
-    {
-        return $this->numero;
-    }
-    public function getCliente()
-    {
-        return $this->cliente;
+        return $this->produto_id;
     }
 }

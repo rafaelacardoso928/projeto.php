@@ -1,5 +1,4 @@
 <?php
-
 require_once "config/Database.php";
 require_once "models/Cliente.php";
 
@@ -9,44 +8,45 @@ class ClienteDAO
 
     public function __construct()
     {
-        $database = new Database();
-        $this->conn = $database->getConnection();
+        $this->conn = (new Database())->getConnection();
     }
 
-    public function inserir(Cliente $cliente)
+    public function inserir($c)
     {
-        $sql = "INSERT INTO clientes (nome, email)
-                VALUES (:nome, :email)";
-
+        $sql = "INSERT INTO clientes (nome,email) VALUES (:n,:e)";
         $stmt = $this->conn->prepare($sql);
-        $stmt->bindValue(":nome", $cliente->getNome());
-        $stmt->bindValue(":email", $cliente->getEmail());
-
+        $stmt->bindValue(":n", $c->getNome());
+        $stmt->bindValue(":e", $c->getEmail());
         return $stmt->execute();
     }
 
     public function listar()
     {
-        $sql = "SELECT * FROM clientes ORDER BY id DESC";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        return $this->conn->query("SELECT * FROM clientes")->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function buscarPorId($id)
     {
-        $sql = "SELECT * FROM clientes WHERE id = :id";
-
-        $stmt = $this->conn->prepare($sql);
+        $stmt = $this->conn->prepare("SELECT * FROM clientes WHERE id=:id");
         $stmt->bindValue(":id", $id);
         $stmt->execute();
+        $d = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $d ? new Cliente($d['id'], $d['nome'], $d['email']) : null;
+    }
 
-        $dados = $stmt->fetch(PDO::FETCH_ASSOC);
+    public function atualizar($c)
+    {
+        $sql = "UPDATE clientes SET nome=:n,email=:e WHERE id=:id";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(":n", $c->getNome());
+        $stmt->bindValue(":e", $c->getEmail());
+        $stmt->bindValue(":id", $c->getId());
+        return $stmt->execute();
+    }
 
-        if ($dados) {
-            return new Cliente($dados['id'], $dados['nome'], $dados['email']);
-        }
-
-        return null;
+    public function excluir($id)
+    {
+        return $this->conn->prepare("DELETE FROM clientes WHERE id=:id")
+            ->execute([":id" => $id]);
     }
 }
